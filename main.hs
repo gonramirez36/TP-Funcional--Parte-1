@@ -86,12 +86,25 @@ cantidadElementos (elemento: cola) = 1 + cantidadElementos cola
 
 esMixta linea = (cantidadElementos . plantas) linea >= 2 && (plantasConsecutivasTieneDistintaEspecialidad . plantas) linea []
 
--- 5) a.
-plantaMataZombie planta zombie = poder planta > vidaZombie zombie
--- 5) b.
-zombieMataPlanta planta zombie = poderMordida zombie > vida planta
 
--- 5) a y b forma generica.
--- atacarObjeto receptor atacante vidaReceptor poderAtacante = vidaReceptor receptor - poderAtacante atacante
--- atacarObjeto peashooter zombieBase  vida poderMordida -- result: 4
--- atacarObjeto zombieBase peashooter vidaZombie poder -- result: 2
+-- 5)
+restarVidaAObjeto objeto cantidadARestar registroVida funcionRestarVidaObjeto = funcionRestarVidaObjeto objeto cantidadFinalARestar
+  where 
+   vidaNuevaDelObjeto = registroVida objeto - cantidadARestar
+   cantidadFinalARestar = if vidaNuevaDelObjeto <= 0 then registroVida objeto else cantidadARestar
+
+-- a.
+restarVidaAZombie zombie cantidadARestar = Zombie {
+  nombre = drop cantidadARestar (nombre zombie),
+  accesorios = accesorios zombie,
+  poderMordida = poderMordida zombie
+}
+plantaMataZombie planta zombie = restarVidaAObjeto zombie (poder planta) vidaZombie  restarVidaAZombie
+
+-- b.
+restarVidaAPlanta planta cantidadARestar = Planta {
+  vida = vida planta - cantidadARestar,
+  cantSoles = cantSoles planta,
+  poder = poder planta
+}
+zombieMataPlanta planta zombie = restarVidaAObjeto planta (poderMordida zombie) vida restarVidaAPlanta
