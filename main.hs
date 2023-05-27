@@ -260,7 +260,6 @@ jardin1 = [linea1, linea2, linea3]
 agregarHorda :: [LineaDeDefensa] -> [(Zombie, Int)] -> [LineaDeDefensa]
 agregarHorda = foldl agregarZombieAJardin
 
-
 -- agregarZombieAJardin [linea1, linea2, linea3] (zombie, 1) = linea1 {zombies=agregarElementoALinea [zombie] linea1 zombies}:[linea2,linea3]
 
 -- agregarZombieAJardin [linea1, linea2, linea3] (zombie, 2) = [linea1] ++ [linea2 {zombies=agregarElementoALinea [zombie] linea2 zombies}] ++ [linea3]
@@ -274,17 +273,55 @@ agregarZombieAJardin jardin (zombie, nroLinea) =
     posicionDeLinea = nroLinea - 1
     nuevaLinea = agregarZombieALinea zombie (jardin !! posicionDeLinea)
 
-agregarZombieALinea zombie linea = linea { zombies = agregarElementoALinea [zombie] linea zombies }
+agregarZombieALinea zombie linea = linea {zombies = agregarElementoALinea [zombie] linea zombies}
 
 -- IV)
-
+-- Siempre la planta dispara primero. Si la planta mata al zombie, el zombie no llega a morder nunca
 rondaDeAtaque :: Planta -> Zombie -> Int -> (Planta, Zombie)
-rondaDeAtaque planta zombie cantidadDeMordidas = (plantaLuegoDelAtaque, zombieLuegoDelAtaque)
+rondaDeAtaque planta zombie cantidadDeMordidas 
+    | zombieMuere zombieLuegoDelAtaque = (planta, zombie{nombre=""})
+    | otherwise = (zombieMataPlanta planta nuevoZombie, zombieLuegoDelAtaque)
   where
     zombieLuegoDelAtaque = plantaMataZombie zombie planta
     nuevoZombie = zombieLuegoDelAtaque {poderMordida = poderMordida zombieLuegoDelAtaque * cantidadDeMordidas}
-    plantaLuegoDelAtaque = zombieMataPlanta planta nuevoZombie
 
 -- V)
-plantaMuere planta zombie cantMordidas = ((==0).vida.fst)(rondaDeAtaque planta zombie cantMordidas)
-zombieMuere planta zombie cantMordidas = ((==0).vidaZombie.snd)(rondaDeAtaque planta zombie cantMordidas)
+plantaMuere = (== 0) . vida
+zombieMuere = (== 0) . vidaZombie
+
+-- VII)
+
+-- resltadoDeAtaque linea horda =
+
+-- comenzarAtaque (LineaDeDefensa [] []) = LineaDeDefensa [] []
+-- comenzarAtaque (LineaDeDefensa [] zombies) = LineaDeDefensa [] zombies
+-- comenzarAtaque (LineaDeDefensa plantas []) = LineaDeDefensa plantas []
+-- comenzarAtaque (LineaDeDefensa (planta : colaP) zombiesDeLinea)
+--   | plantaMuere plantaDaniada && zombieMuere zombieDaniado = comenzarAtaque (LineaDeDefensa colaP (init zombiesDeLinea))
+--   | plantaMuere plantaDaniada = comenzarAtaque (LineaDeDefensa colaP (init zombiesDeLinea ++ [zombieDaniado]))
+--   | zombieMuere zombieDaniado = comenzarAtaque (LineaDeDefensa (plantaDaniada : colaP) (init zombiesDeLinea))
+--   | otherwise = comenzarAtaque (LineaDeDefensa (plantaDaniada:colaP) (zombieDaniado : init zombiesDeLinea))
+--   where
+--     ultimoZombie = last zombiesDeLinea
+--     resultadoDelFuegoCruzado = fuegoCruzado (planta, ultimoZombie)
+--     zombieDaniado = snd resultadoDelFuegoCruzado
+--     plantaDaniada = fst resultadoDelFuegoCruzado
+
+-- fuegoCruzado :: (Planta, Zombie) -> (Planta, Zombie)
+-- fuegoCruzado (planta, zombie) = rondaDeAtaque planta zombie 1
+
+lineaa = LineaDeDefensa [peashooter] [zombieBase, zombieBase, zombieBase, zombieBase, zombieBase]
+
+procesarAtaquesEnLinea (LineaDeDefensa [] zombies) = LineaDeDefensa [] zombies
+procesarAtaquesEnLinea (LineaDeDefensa plantas []) = LineaDeDefensa plantas []
+procesarAtaquesEnLinea linea = procesarAtaquesEnLinea (actualizarLinea linea (ejecutarAtaque linea))
+
+ejecutarAtaque linea = rondaDeAtaque ((head.plantas)linea) ((last.zombies)linea) 1
+
+actualizarLinea linea (planta, zombie) 
+          | plantaMuere planta = linea { plantas = (tail.plantas) linea }
+          | zombieMuere zombie = linea { zombies = (init.zombies) linea }
+          | otherwise = linea { 
+                plantas = ((planta:).tail.plantas) linea,
+                zombies = (init.zombies) linea ++ [zombie]
+            }
