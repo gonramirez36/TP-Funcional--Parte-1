@@ -352,6 +352,7 @@ tieneMenosLetras zombie linea =
 
 -- a. Aqui se aplica composición de funciones, guardas, listas, funciones de orden superior como filter que recibe una función y una lista y evalua 
 -- cada posición de la lista con esa función. 
+-- Currificacion, en la funcion que recibe filter como parametro
 
 -- b.
 filtrarSiExiste elementoAEncontrar condicionDeFiltrado exepcion lista = head (filter (\item -> elementoAEncontrar `elem` lista && condicionDeFiltrado elementoAEncontrar item) lista ++ [fst exepcion])
