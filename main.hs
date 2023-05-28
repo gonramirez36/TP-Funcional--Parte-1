@@ -357,14 +357,19 @@ tieneMenosLetras zombie linea =
 -- 
 -- 0. La función primero evalúa si h está dentro de la lista y en caso afirmativo filtra los valores de la lista por la función m recibiendo a h y
 -- devuelve la cabeza de la lista que devuelve filter, en caso negativo pasa al otro caso que devuelve la primera posición de la lista p. 
--- Entonces el tipo sería a -> (a -> Bool) -> (b, c) -> [a]  -> b
+-- Entonces el tipo sería a -> (a -> a -> Bool) -> (a, b) -> [a] -> a
 
 -- a. Aqui se aplica composición de funciones, guardas, listas, funciones de orden superior como filter que recibe una función y una lista y evalua 
 -- cada posición de la lista con esa función. 
 -- Currificacion, en la funcion que recibe filter como parametro
 
 -- b.
-filtrarSiExiste elementoAEncontrar condicionDeFiltrado exepcion lista = head (filter (\item -> elementoAEncontrar `elem` lista && condicionDeFiltrado elementoAEncontrar item) lista ++ [fst exepcion])
+-- la funcion ahora es mas expresiva
+-- p ahora es una variable independiente, ya que la tupla no era necesaria
+filtrarUsandoExistenteYObtenerPrimerElemento :: Eq a => a -> (a -> a -> Bool) -> a -> [a] -> a
+filtrarUsandoExistenteYObtenerPrimerElemento elementoDeLista condicionDeFiltro exepcion lista 
+              | elem elementoDeLista lista = head (filter (condicionDeFiltro elementoDeLista) lista)
+              | otherwise = exepcion
 
 -- c. Si la lista es infinita y nunca encuentra al elemento h, la función elem va a estár buscando infinitas veces y nunca va a pasar a la segunda
 -- guarda. En el caso de que lo encuentre haría la segunda parte con normalidad.
