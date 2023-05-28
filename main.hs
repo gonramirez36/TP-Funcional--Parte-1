@@ -323,9 +323,19 @@ actualizarLinea linea (planta, zombie)
                 zombies = (init.zombies) linea ++ [zombie]
             }
 
--- VIII) 
+-- VIII)
+
+
 
 -- IX)
+tieneMenosLetras zombie linea =
+  not
+    ( any
+        ( \zombieEnLinea ->
+            (length . nombre) zombieEnLinea <= (length . nombre) zombie
+        )
+        (zombies linea)
+    )
 
 -- X) Explicar qué hace la función y dar los tipos de la función:
 
