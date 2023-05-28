@@ -278,15 +278,16 @@ agregarZombieALinea zombie linea = linea {zombies = agregarElementoALinea [zombi
 -- IV)
 -- Siempre la planta dispara primero. Si la planta mata al zombie, el zombie no llega a morder nunca
 rondaDeAtaque :: Planta -> Zombie -> Int -> (Planta, Zombie)
-rondaDeAtaque planta zombie cantidadDeMordidas 
-    | zombieMuere zombieLuegoDelAtaque = (planta, zombie{nombre=""})
-    | otherwise = (zombieMataPlanta planta nuevoZombie, zombieLuegoDelAtaque)
+rondaDeAtaque planta zombie cantidadDeMordidas
+  | zombieMuere zombieLuegoDelAtaque = (planta, zombie {nombre = ""})
+  | otherwise = (zombieMataPlanta planta nuevoZombie, zombieLuegoDelAtaque)
   where
     zombieLuegoDelAtaque = plantaMataZombie zombie planta
     nuevoZombie = zombieLuegoDelAtaque {poderMordida = poderMordida zombieLuegoDelAtaque * cantidadDeMordidas}
 
 -- V)
 plantaMuere = (== 0) . vida
+
 zombieMuere = (== 0) . vidaZombie
 
 -- VII)
@@ -316,12 +317,24 @@ procesarAtaquesEnLinea (LineaDeDefensa [] zombies) = LineaDeDefensa [] zombies
 procesarAtaquesEnLinea (LineaDeDefensa plantas []) = LineaDeDefensa plantas []
 procesarAtaquesEnLinea linea = procesarAtaquesEnLinea (actualizarLinea linea (ejecutarAtaque linea))
 
-ejecutarAtaque linea = rondaDeAtaque ((head.plantas)linea) ((last.zombies)linea) 1
+ejecutarAtaque linea = rondaDeAtaque ((head . plantas) linea) ((last . zombies) linea) 1
 
-actualizarLinea linea (planta, zombie) 
-          | plantaMuere planta = linea { plantas = (tail.plantas) linea }
-          | zombieMuere zombie = linea { zombies = (init.zombies) linea }
-          | otherwise = linea { 
-                plantas = ((planta:).tail.plantas) linea,
-                zombies = (init.zombies) linea ++ [zombie]
-            }
+actualizarLinea linea (planta, zombie)
+  | plantaMuere planta = linea {plantas = (tail . plantas) linea}
+  | zombieMuere zombie = linea {zombies = (init . zombies) linea}
+  | otherwise =
+      linea
+        { plantas = ((planta :) . tail . plantas) linea,
+          zombies = (init . zombies) linea ++ [zombie]
+        }
+
+        
+-- IX)
+tieneMenosLetras zombie linea =
+  not
+    ( any
+        ( \zombieEnLinea ->
+            (length . nombre) zombieEnLinea <= (length . nombre) zombie
+        )
+        (zombies linea)
+    )
