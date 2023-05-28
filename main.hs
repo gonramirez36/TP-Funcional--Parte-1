@@ -344,6 +344,7 @@ actualizarLinea linea (planta, zombie)
 -- cada posición de la lista con esa función. 
 
 -- b.
+filtrarSiExiste elementoAEncontrar condicionDeFiltrado exepcion lista = head (filter (\item -> elementoAEncontrar `elem` lista && condicionDeFiltrado elementoAEncontrar item) lista ++ [fst exepcion])
 
 -- c. Si la lista es infinita y nunca encuentra al elemento h, la función elem va a estár buscando infinitas veces y nunca va a pasar a la segunda
 -- guarda. En el caso de que lo encuentre haría la segunda parte con normalidad.
