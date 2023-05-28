@@ -294,8 +294,8 @@ zombieMuere = (== 0) . vidaZombie
 --ataqueSistematico zombie (planta : colaPlanta) = zombieMataPlanta planta zombie : ataqueSistematico zombie colaPlanta
 
 --con lista por comprensión
-ataqueSistematico :: Zombie -> [Planta] -> [Planta]
-ataqueSistematico zombie (planta:cola) = [zombieMataPlanta planta zombie | planta  <- planta : cola]
+ataqueSistematico :: [Planta] -> Zombie -> [Planta]
+ataqueSistematico (planta:cola) zombie = [zombieMataPlanta planta zombie | planta  <- planta : cola]
 
 -- VII)
 resultadoDeAtaque :: LineaDeDefensa -> [(Zombie, Int)] -> LineaDeDefensa
@@ -324,8 +324,17 @@ actualizarLinea linea (planta, zombie)
             }
 
 -- VIII)
+ataqueSistemicoALinea linea = linea {
+  plantas=foldl ataqueSistematico (plantas linea) (zombies linea)
+}
 
+obtenerPlantasConVida linea = filter ((/=0).vida) (plantas linea) 
+obtenerLineasConPlantas = filter ((/=0).length.obtenerPlantasConVida)
+noHayPlantasEnJardin = (==0).length.obtenerLineasConPlantas
 
+theZombiesAteYourBrains jardin horda = noHayPlantasEnJardin (map ataqueSistemicoALinea jardinConNuevaHorda)
+  where 
+    jardinConNuevaHorda = agregarHorda jardin horda
 
 -- IX)
 tieneMenosLetras zombie linea =
